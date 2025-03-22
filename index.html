@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Victor | Developer</title>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Font Awesome -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --dark-bg: #0a0a0a;
+      --dark-surface: #121212;
+      --accent-primary: #5D3FD3;
+      --accent-secondary: #00DBDE;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    
+    /* Container for the Three.js canvas */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-primary);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease-out, width 0.2s ease, height 0.2s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-secondary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10000;
+      transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      mix-blend-mode: difference;
+    }
+    
+    /* Main layout */
+    main {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    section {
+      min-height: 100vh;
+      width: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 5vw;
+    }
+    
+    /* Hero Section */
+    #hero {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .glitch-container {
+      position: relative;
+      font-size: 8vw;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      width: 100%;
+    }
+    .glitch-text {
+      position: relative;
+      display: inline-block;
+      animation: glitch-skew 1s infinite linear alternate-reverse;
+    }
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .glitch-text::before {
+      left: 2px;
+      text-shadow: -2px 0 var(--accent-primary);
+      clip: rect(44px, 450px, 56px, 0);
+      animation: glitch-anim 5s infinite linear alternate-reverse;
+    }
+    .glitch-text::after {
+      left: -2px;
+      text-shadow: -2px 0 var(--accent-secondary);
+      clip: rect(44px, 450px, 56px, 0);
+      animation: glitch-anim2 5s infinite linear alternate-reverse;
+    }
+    @keyframes glitch-anim {
+      0% { clip: rect(24px, 9999px, 66px, 0); transform: skew(0.5deg); }
+      5% { clip: rect(52px, 9999px, 74px, 0); transform: skew(0.4deg); }
+      10% { clip: rect(98px, 9999px, 12px, 0); transform: skew(0.5deg); }
+      15% { clip: rect(42px, 9999px, 11px, 0); transform: skew(0.9deg); }
+      20% { clip: rect(87px, 9999px, 16px, 0); transform: skew(0.1deg); }
+      25% { clip: rect(27px, 9999px, 53px, 0); transform: skew(0.9deg); }
+      30% { clip: rect(21px, 9999px, 59px, 0); transform: skew(0.8deg); }
+      35% { clip: rect(74px, 9999px, 51px, 0); transform: skew(0.5deg); }
+      40% { clip: rect(31px, 9999px, 12px, 0); transform: skew(0.3deg); }
+      45% { clip: rect(26px, 9999px, 52px, 0); transform: skew(0.4deg); }
+      50% { clip: rect(88px, 9999px, 86px, 0); transform: skew(0.6deg); }
+      55% { clip: rect(22px, 9999px, 91px, 0); transform: skew(0.5deg); }
+      60% { clip: rect(28px, 9999px, 59px, 0); transform: skew(0.7deg); }
+      65% { clip: rect(75px, 9999px, 85px, 0); transform: skew(0.5deg); }
+      70% { clip: rect(93px, 9999px, 46px, 0); transform: skew(0.9deg); }
+      75% { clip: rect(48px, 9999px, 23px, 0); transform: skew(0.4deg); }
+      80% { clip: rect(38px, 9999px, 33px, 0); transform: skew(0.1deg); }
+      85% { clip: rect(69px, 9999px, 69px, 0); transform: skew(0.2deg); }
+      90% { clip: rect(19px, 9999px, 22px, 0); transform: skew(0.8deg); }
+      95% { clip: rect(33px, 9999px, 89px, 0); transform: skew(0.6deg); }
+      100% { clip: rect(42px, 9999px, 74px, 0); transform: skew(0.4deg); }
+    }
+    @keyframes glitch-anim2 {
+      0% { clip: rect(64px, 9999px, 36px, 0); transform: skew(0.7deg); }
+      5% { clip: rect(95px, 9999px, 59px, 0); transform: skew(0.3deg); }
+      10% { clip: rect(21px, 9999px, 49px, 0); transform: skew(0.2deg); }
+      15% { clip: rect(89px, 9999px, 59px, 0); transform: skew(0.5deg); }
+      20% { clip: rect(32px, 9999px, 17px, 0); transform: skew(0.8deg); }
+      25% { clip: rect(26px, 9999px, 76px, 0); transform: skew(0.5deg); }
+      30% { clip: rect(81px, 9999px, 42px, 0); transform: skew(0.6deg); }
+      35% { clip: rect(86px, 9999px, 39px, 0); transform: skew(0.7deg); }
+      40% { clip: rect(64px, 9999px, 85px, 0); transform: skew(0.9deg); }
+      45% { clip: rect(42px, 9999px, 31px, 0); transform: skew(0.1deg); }
+      50% { clip: rect(67px, 9999px, 69px, 0); transform: skew(0.5deg); }
+      55% { clip: rect(87px, 9999px, 16px, 0); transform: skew(0.1deg); }
+      60% { clip: rect(63px, 9999px, 82px, 0); transform: skew(0.8deg); }
+      65% { clip: rect(41px, 9999px, 83px, 0); transform: skew(0.6deg); }
+      70% { clip: rect(64px, 9999px, 35px, 0); transform: skew(0.2deg); }
+      75% { clip: rect(95px, 9999px, 13px, 0); transform: skew(0.7deg); }
+      80% { clip: rect(32px, 9999px, 97px, 0); transform: skew(0.4deg); }
+      85% { clip: rect(79px, 9999px, 37px, 0); transform: skew(0.6deg); }
+      90% { clip: rect(59px, 9999px, 29px, 0); transform: skew(0.3deg); }
+      95% { clip: rect(73px, 9999px, 48px, 0); transform: skew(0.8deg); }
+      100% { clip: rect(82px, 9999px, 61px, 0); transform: skew(0.4deg); }
+    }
+    @keyframes glitch-skew {
+      0% {transform: skew(0deg);}
+      10% {transform: skew(0deg);}
+      20% {transform: skew(0deg);}
+      30% {transform: skew(0deg);}
+      40% {transform: skew(0deg);}
+      50% {transform: skew(1deg);}
+      60% {transform: skew(0deg);}
+      70% {transform: skew(0deg);}
+      80% {transform: skew(-1deg);}
+      90% {transform: skew(0deg);}
+      100% {transform: skew(0deg);}
+    }
+
+    /* Subtitle / Typewriter (updated: no CSS animation) */
+    .subtitle {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .typewriter {
+      display: inline-block;
+      overflow: hidden;
+      border-right: 2px solid var(--accent-primary);
+      white-space: nowrap;
+      letter-spacing: 0.15em;
+    }
+    
+    /* Scroll Indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fade 2s infinite;
+    }
+    .scroll-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent-primary);
+    }
+    .scroll-text {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 300;
+    }
+    @keyframes fade {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    /* Fixed Nav Dots */
+    .nav-dots {
+      position: fixed;
+      top: 50%;
+      right: 2rem;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      z-index: 100;
+    }
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .nav-dot.active {
+      background-color: var(--accent-primary);
+      transform: scale(1.5);
+    }
+    .nav-dot:hover {
+      background-color: var(--accent-secondary);
+    }
+    
+    /* Projects Section */
+    #projects {
+      display: flex;
+      align-items: center;
+    }
+    .section-title {
+      font-size: 3rem;
+      margin-bottom: 3rem;
+      color: var(--text-primary);
+      position: relative;
+      display: inline-block;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+    }
+    .projects-container {
+      width: 100%;
+      position: relative;
+    }
+    .project-carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 2rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 2rem 0;
+    }
+    .project-carousel::-webkit-scrollbar {
+      display: none;
+    }
+    .project-item {
+      min-width: 300px;
+      width: 300px;
+      height: 450px;
+      background-color: var(--dark-surface);
+      border-radius: 1rem;
+      scroll-snap-align: start;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .project-item:hover {
+      transform: translateY(-10px);
+    }
+    .project-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.4;
+      transition: opacity 0.3s, transform 0.5s;
+    }
+    .project-item:hover .project-bg {
+      opacity: 0.2;
+      transform: scale(1.1);
+    }
+    .project-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 2rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+      transform: translateY(100px);
+      transition: transform 0.3s;
+    }
+    .project-item:hover .project-content {
+      transform: translateY(0);
+    }
+    .project-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .project-tag {
+      background-color: rgba(93, 63, 211, 0.2);
+      color: var(--accent-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .project-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .project-link {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    .project-link:hover {
+      color: var(--text-primary);
+    }
+    .carousel-nav {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      padding: 0 1rem;
+    }
+    .carousel-button {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--text-primary);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .carousel-button:hover {
+      background-color: var(--accent-primary);
+      transform: scale(1.1);
+    }
+    
+    /* Skills Section */
+    .skill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .skill-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .skill-item:hover {
+      transform: translateY(-10px);
+    }
+    .skill-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent-primary);
+      transition: color 0.3s, transform 0.3s;
+    }
+    .skill-item:hover .skill-icon {
+      color: var(--accent-secondary);
+      transform: scale(1.2);
+    }
+    .skill-name {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+    }
+    
+    /* About Section */
+    .about-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .about-image {
+      flex: 1;
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      min-width: 300px;
+      max-width: 400px;
+      height: 400px;
+    }
+    .about-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom right, var(--accent-primary), var(--accent-secondary));
+      opacity: 0.3;
+      z-index: 1;
+    }
+    .about-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .about-content {
+      flex: 1;
+    }
+    .about-text {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+    
+    /* CTA Button */
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+      color: var(--text-primary);
+      padding: 0.75rem 2rem;
+      border-radius: 2rem;
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, var(--accent-secondary), var(--accent-primary));
+      z-index: -1;
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(93, 63, 211, 0.3);
+    }
+    .cta-button:hover::before {
+      opacity: 1;
+    }
+    
+    /* Contact Section */
+    .contact-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .contact-text {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      width: 100%;
+    }
+    .contact-item {
+      background-color: var(--dark-surface);
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .contact-item:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .contact-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-primary);
+      transition: color 0.3s, transform 0.3s;
+    }
+    .contact-item:hover .contact-icon {
+      color: var(--accent-secondary);
+      transform: scale(1.2);
+    }
+    .contact-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .contact-value {
+      color: var(--text-secondary);
+    }
+    .contact-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .contact-link:hover {
+      color: var(--accent-secondary);
+    }
+    
+    /* Footer */
+    footer {
+      padding: 2rem;
+      text-align: center;
+      background-color: var(--dark-surface);
+      margin-top: 4rem;
+    }
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .social-link {
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      transition: color 0.3s, transform 0.3s;
+    }
+    .social-link:hover {
+      color: var(--accent-primary);
+      transform: translateY(-5px);
+    }
+    .copyright {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* Reveal animation utility classes */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out;
+    }
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .glitch-container {
+        font-size: 12vw;
+      }
+      .nav-dots {
+        right: 1rem;
+      }
+      .about-container {
+        flex-direction: column;
+      }
+      .about-image {
+        width: 100%;
+      }
+      .skill-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+      .section-title {
+        font-size: 2.5rem;
+      }
+      .project-item {
+        min-width: 85vw;
+        width: 85vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Custom Cursor Elements -->
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
+
+  <!-- Three.js Background Container -->
+  <div id="canvas-container"></div>
+  
+  <!-- Navigation Dots -->
+  <div class="nav-dots">
+    <div class="nav-dot active" data-section="hero"></div>
+    <div class="nav-dot" data-section="projects"></div>
+    <div class="nav-dot" data-section="skills"></div>
+    <div class="nav-dot" data-section="about"></div>
+    <div class="nav-dot" data-section="contact"></div>
+  </div>
+  
+  <main>
+    <!-- Hero Section -->
+    <section id="hero" class="reveal">
+      <div class="glitch-container">
+        <span class="glitch-text" data-text="OMOTOSHO VICTOR">OMOTOSHO VICTOR</span>
+      </div>
+      <div class="subtitle">
+        <!-- Typewriter text will be injected here -->
+        <span class="typewriter"></span>
+      </div>
+      <div class="scroll-indicator">
+        <div class="scroll-icon">
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="scroll-text">Scroll down</div>
+      </div>
+    </section>
+    
+    <!-- Projects Section -->
+    <section id="projects" class="reveal">
+      <h2 class="section-title">Projects</h2>
+      <div class="projects-container">
+        <div class="project-carousel">
+          <div class="project-item">
+            <img src="https://fatbikekorting.com/wp-content/uploads/2025/03/Untitled-design-1.png" alt="E-commerce Project" class="project-bg">
+            <div class="project-content">
+              <h3 class="project-title">Fatbike E-commerce Website (dutch)</h3>
+              <div class="project-tags">
+                <span class="project-tag">Woocommerce</span>
+                <span class="project-tag">Elementor</span>
+                <span class="project-tag">PHP</span>
+              </div>
+              <p class="project-description"></p>
+              <a href="https://fatbikekorting.com" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+          
+          <div class="project-item">
+            <img src="https://voxalabs.com/white.png" alt="WordPress Project" class="project-bg">
+            <div class="project-content">
+              <h3 class="project-title">Voxalabs AI Voice Agent (Beta)</h3>
+              <div class="project-tags">
+                <span class="project-tag">React</span>
+                <span class="project-tag">Nodejs</span>
+                <span class="project-tag">API</span>
+              </div>
+              <p class="project-description"></p>
+              <a href="https://voxalabs.com/" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+          
+          <div class="project-item">
+            <img src="https://chatbotsai.co/images/a6bb9bd4-hero-visual.webp" alt="Dashboard Project" class="project-bg">
+            <div class="project-content">
+              <h3 class="project-title">chatbotsai.co</h3>
+              <div class="project-tags">
+                <span class="project-tag">HTML5/</span>
+                <span class="project-tag">Javascript/CSS</span>
+                <span class="project-tag">API</span>
+              </div>
+              <p class="project-description">Feature-rich dashboard with real-time analytics and user management.</p>
+              <a href="https://chatbotsai.co" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+          
+          <div class="project-item">
+            <img src="https://houtcompany.com/wp-content/uploads/2025/01/Black-and-Beige-Elegant-Simple-Flower-Circle-Logo-2-e1742538966326.png" alt="Mobile App" class="project-bg">
+            <div class="project-content">
+              <h3 class="project-title">Hout Ecommerce Website (dutch)</h3>
+              <div class="project-tags">
+                <span class="project-tag">Woocommerce</span>
+                <span class="project-tag">Elementor</span>
+                <span class="project-tag">PHP</span>
+              </div>
+              <p class="project-description">Mobile application for tracking workouts, nutrition, and fitness goals.</p>
+              <a href="https://houtcompany.com" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+		
+		  <div class="project-item">
+            <img src="https://images.seeklogo.com/logo-png/43/1/web3-logo-png_seeklogo-436086.png" alt="Mobile App" class="project-bg">
+            <div class="project-content">
+              <h3 class="project-title">Hout Ecommerce Website (dutch)</h3>
+              <div class="project-tags">
+                <span class="project-tag">Nodejs</span>
+                <span class="project-tag">Web3</span>
+                <span class="project-tag">API</span>
+              </div>
+              <p class="project-description">Mobile application for tracking workouts, nutrition, and fitness goals.</p>
+              <a href="https://t.me/sol_memesbot" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="carousel-nav">
+          <div class="carousel-button prev-button">
+            <i class="fas fa-chevron-left"></i>
+          </div>
+          <div class="carousel-button next-button">
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Skills Section -->
+    <section id="skills" class="reveal">
+      <h2 class="section-title">Skills</h2>
+      <div class="skill-grid">
+        <div class="skill-item">
+          <i class="fab fa-react skill-icon"></i>
+          <span class="skill-name">React</span>
+        </div>
+        <div class="skill-item">
+          <i class="fab fa-node-js skill-icon"></i>
+          <span class="skill-name">Node.js</span>
+        </div>
+        <div class="skill-item">
+          <i class="fab fa-js skill-icon"></i>
+          <span class="skill-name">JavaScript</span>
+        </div>
+        <div class="skill-item">
+          <i class="fab fa-wordpress skill-icon"></i>
+          <span class="skill-name">WordPress</span>
+        </div>
+        <div class="skill-item">
+          <i class="fab fa-php skill-icon"></i>
+          <span class="skill-name">PHP</span>
+        </div>
+        <div class="skill-item">
+          <i class="fas fa-database skill-icon"></i>
+          <span class="skill-name">MongoDB</span>
+        </div>
+        <div class="skill-item">
+          <i class="fab fa-html5 skill-icon"></i>
+          <span class="skill-name">HTML5</span>
+        </div>
+        <div class="skill-item">
+          <i class="fab fa-css3-alt skill-icon"></i>
+          <span class="skill-name">CSS3</span>
+        </div>
+        <div class="skill-item">
+          <i class="fas fa-code skill-icon"></i>
+          <span class="skill-name">TypeScript</span>
+        </div>
+        <div class="skill-item">
+          <i class="fas fa-server skill-icon"></i>
+          <span class="skill-name">Express.js</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="reveal">
+      <div class="about-container">
+        <div class="about-image">
+          <img src="https://cdn.pixabay.com/photo/2014/04/02/10/25/man-303792_1280.png" alt="Victor - Full Stack Developer">
+        </div>
+        <div class="about-content">
+          <h2 class="section-title">About Me</h2>
+          <p class="about-text">
+            I'm a passionate Full Stack Developer with expertise in modern web technologies and WordPress development. 
+            Specializing in creating responsive, user-friendly applications that deliver exceptional user experiences.
+          </p>
+          <a href="#contact" class="cta-button">Get in Touch</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="reveal">
+      <div class="contact-container">
+        <h2 class="section-title">Contact</h2>
+        <p class="contact-text">Let's work together on your next project</p>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <i class="fas fa-envelope contact-icon"></i>
+            <div class="contact-label">Email</div>
+            <a href="mailto:ostechworld@gmail.com" class="contact-link">ostechworld@gmail.com</a>
+          </div>
+          <div class="contact-item">
+            <i class="fab fa-whatsapp contact-icon"></i>
+            <div class="contact-label">GitHub</div>
+            <a href="https://wa.me/2347049886193" target="_blank" class="contact-link">+2347049886193</a>
+          </div>
+          <div class="contact-item">
+            <i class="fab fa-linkedin contact-icon"></i>
+            <div class="contact-label">LinkedIn</div>
+            <a href="https://www.linkedin.com/in/victor-omotosho-859107194" target="_blank" class="contact-link">@victor</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="social-links">
+        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+      </div>
+      <div class="copyright">
+        © 2025 Omotosho Victor. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    /*************************************
+     * Three.js BACKGROUND
+     *************************************/
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75, 
+      window.innerWidth / window.innerHeight, 
+      0.1, 
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    // Create a rich starfield background
+    const geometry = new THREE.BufferGeometry();
+    const particles = 3000;
+    const positions = new Float32Array(particles * 3);
+
+    for (let i = 0; i < particles * 3; i += 3) {
+      positions[i]     = (Math.random() - 0.5) * 20;
+      positions[i + 1] = (Math.random() - 0.5) * 20;
+      positions[i + 2] = (Math.random() - 0.5) * 20;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      size: 0.02,
+      color: 0x5D3FD3,
+      transparent: true,
+      opacity: 0.8
+    });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      points.rotation.x += 0.0005;
+      points.rotation.y += 0.0007;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY;
+      camera.position.y = -scrollPos * 0.0005;
+      camera.position.x = scrollPos * 0.0003;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    /*************************************
+     * CUSTOM CURSOR
+     *************************************/
+    const cursor = document.querySelector('.cursor');
+    const cursorDot = document.querySelector('.cursor-dot');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      cursorDot.style.left = e.clientX + 'px';
+      cursorDot.style.top = e.clientY + 'px';
+    });
+
+    const hoverElements = document.querySelectorAll('a, button, .carousel-button, .nav-dot, .cta-button');
+    hoverElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'scale(1.6)';
+        cursorDot.style.transform = 'scale(0.6)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'scale(1)';
+        cursorDot.style.transform = 'scale(1)';
+      });
+    });
+
+    /*************************************
+     * NAV DOTS AND SECTION OBSERVER
+     *************************************/
+    const sections = document.querySelectorAll('section');
+    const navDots = document.querySelectorAll('.nav-dot');
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5
+    };
+    
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          navDots.forEach(dot => {
+            dot.classList.remove('active');
+            if (dot.dataset.section === sectionId) {
+              dot.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+    
+    sections.forEach(section => sectionObserver.observe(section));
+
+    navDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const sectionId = dot.dataset.section;
+        document.getElementById(sectionId).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    /*************************************
+     * PROJECT CAROUSEL NAVIGATION
+     *************************************/
+    const carousel = document.querySelector('.project-carousel');
+    const prevButton = document.querySelector('.prev-button');
+    const nextButton = document.querySelector('.next-button');
+    
+    nextButton.addEventListener('click', () => {
+      carousel.scrollBy({ left: 350, behavior: 'smooth' });
+    });
+    prevButton.addEventListener('click', () => {
+      carousel.scrollBy({ left: -350, behavior: 'smooth' });
+    });
+
+    /*************************************
+     * SECTION REVEAL ANIMATIONS
+     *************************************/
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    /*************************************
+     * TYPEWRITER EFFECT
+     * Cycles through three texts with type, pause, delete, repeat.
+     *************************************/
+    const texts = ["Full Stack Developer", "WordPress Expert", "Tech Enthusiast"];
+    let currentTextIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    const typingSpeed = 150;
+    const deletingSpeed = 80;
+    const pauseDelay = 2000; // pause after typing the full text
+
+    const typewriterElement = document.querySelector('.typewriter');
+
+    function typeEffect() {
+      const currentText = texts[currentTextIndex];
+      if (!isDeleting) {
+        typewriterElement.textContent = currentText.substring(0, charIndex + 1);
+        charIndex++;
+        if (charIndex === currentText.length) {
+          setTimeout(() => { isDeleting = true; typeEffect(); }, pauseDelay);
+          return;
+        }
+      } else {
+        typewriterElement.textContent = currentText.substring(0, charIndex - 1);
+        charIndex--;
+        if (charIndex === 0) {
+          isDeleting = false;
+          currentTextIndex = (currentTextIndex + 1) % texts.length;
+        }
+      }
+      const speed = isDeleting ? deletingSpeed : typingSpeed;
+      setTimeout(typeEffect, speed);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      typeEffect();
+    });
+  </script>
+</body>
+</html>
